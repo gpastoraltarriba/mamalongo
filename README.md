@@ -1,73 +1,184 @@
-# React + TypeScript + Vite
+# 🗂️ Kanban + Timesheets Lite — Equipo DELTA
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Semana 1 – Arranque y estructura base del proyecto**  
+📅 Fecha: 9 al 13 de octubre de 2025  
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🧭 1. Descripción general
 
-## React Compiler
+**Kanban + Timesheets Lite** es una aplicación web que combina un tablero tipo Trello con un sistema de registro de horas trabajadas (*timesheets*).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+El objetivo de la **Semana 1** fue **arrancar el entorno de desarrollo** y lograr que la aplicación funcione en local con:
+- Un **login simulado** (estructura preparada para conectar con Firebase Auth en la Semana 2).  
+- Un **primer tablero con tres columnas**: **Por hacer**, **En curso** y **Hecho**.  
+- Una **estructura visual y técnica funcional** con React + TypeScript.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 👥 2. Equipo y roles
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+| Miembro | Rol Semana 1 |
+|----------|---------------|
+| **Ivan Bascones**  | Coordinador | https://github.com/ivanBasCub |
+| **Jonatan Albornoz**  | Frontend | https://github.com/electroalbor |
+| **Gerard Pastor** | Datos / Modelo | https://github.com/gpastoraltarriba |
+| **Alberto García Martín**  | QA / Pruebas | https://github.com/albertogarciamartin |
+| **Davide Mazzocchetti** | Documentación / Demo | https://github.com/DvdMzz17 |
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+> 🔄 Los roles rotan semanalmente para que todos pasen por cada área del proyecto.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+---
+
+## ⚙️ 3. Cómo ejecutar el proyecto
+
+**Requisitos previos**
+- Node.js 20 o superior  
+- npm (instalado junto con Node)
+- Git y una cuenta de GitHub
+- Navegador (Chrome o Edge recomendado)
+
+**Pasos para ejecutar:**
+```bash
+git clone https://github.com/Nexeus-Big-Data-Labs/202509-delta.git
+cd 202509-delta
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+La aplicación se abrirá en `http://localhost:5173`
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+> ⚙️ *El archivo `.env.local` y la configuración de Firebase se implementarán en la Semana 2.*
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+---
+
+## 💻 4. Estructura del proyecto
+
 ```
+src/
+  pages/
+    Login.tsx
+    Boards.tsx
+    BoardView.tsx
+  components/
+    Header.tsx
+  lib/
+    firebase.ts (pendiente de implementación)
+  router.tsx
+  main.tsx
+```
+
+---
+
+## 🗃️ 5. Modelo de datos (planeado para Firestore)
+
+Colecciones iniciales definidas para la próxima fase:
+
+- **users** → { uid, nombre, email, foto }  
+- **boards** → { id, name, createdAt }  
+- **lists** → { id, boardId, name, order }
+
+> Al crear un tablero, se generarán automáticamente tres listas:  
+> **Por hacer**, **En curso** y **Hecho**.
+
+---
+
+## ✅ 6. Checklist — Definition of Done (Semana 1)
+
+| Tarea | Estado |
+|---|---|
+| Roles asignados en README | ✅ |
+| Proyecto creado con Vite + TypeScript | ✅ |
+| Estructura base con rutas funcionales | ✅ |
+| Login funcional (modo simulado) | ✅ |
+| Pantalla de tableros creada | ✅ |
+| Creación automática de tres columnas | ✅ |
+| Navegación a `/board/:id` operativa | ✅ |
+| README actualizado | ✅ |
+| Mini demo lista para revisión | ✅ |
+
+---
+
+## 📆 7. Plan de trabajo — Semana 1
+
+| Día | Objetivo principal |
+|-----|--------------------|
+| **Lunes** | Asignación de roles, configuración del entorno, creación del proyecto React + Vite |
+| **Martes** | Configuración inicial del router y estructura base |
+| **Miércoles** | Implementación de pantallas: Login, Boards, BoardView |
+| **Jueves** | Creación del componente Header y revisión visual |
+| **Viernes** | Revisión, limpieza de código y grabación de la demo |
+
+---
+
+## 🗃️ 8. Funcionalidades implementadas (Semana 1)
+
+✅ Configuración inicial con **React + Vite + TypeScript**  
+✅ Navegación entre pantallas (Login → Boards → BoardView)  
+✅ **Login simulado** (estructura lista para Firebase Auth)  
+✅ Pantalla de tableros con creación simulada  
+✅ Tablero visual con tres columnas (Por hacer / En curso / Hecho)  
+✅ Componente **Header** reutilizable con botón de cierre de sesión  
+✅ **README actualizado**  
+✅ Preparación de la **demo de revisión**
+
+---
+
+## 🎥 9. Demo de la semana
+
+La demo mostrará:
+1. Inicio de sesión simulado.  
+2. Navegación hacia la vista de tableros.  
+3. Creación de un tablero de ejemplo.  
+4. Visualización de las tres columnas:  
+   - Por hacer  
+   - En curso  
+   - Hecho  
+
+🎬 *Duración estimada: 2–3 minutos.*
+
+> La demo se centra en mostrar el flujo básico de la aplicación, no el código interno.
+
+---
+
+## 🧾 10. Acta de la semana 1
+
+**Completado:**
+- Proyecto creado con React + Vite.  
+- Rutas y componentes principales funcionando.  
+- Login simulado con navegación completa.  
+- Primer tablero visible con las tres columnas.  
+- README actualizado.  
+
+**Bloqueos / Riesgos:**
+- Sin bloqueos críticos esta semana.  
+- Configuración de Firebase pendiente.  
+
+**Decisiones tomadas:**
+- Usar Google Auth como login principal (a implementar en Semana 2).  
+- Mantener Firebase como backend.  
+- Definir estructura de componentes desde el inicio.
+
+---
+
+## 🚀 11. Próximos pasos
+
+- Conectar la app con **Firebase Auth** (login real).  
+- Crear y guardar **tableros reales** en Firestore.  
+- Implementar la **creación de tarjetas** dentro de cada columna.  
+- Añadir **responsable y fecha límite** a las tarjetas.  
+- Continuar con la **rotación de roles** para la Semana 2.
+
+---
+
+📄 **Versión:** Semana 1 – Estructura base  
+👨‍💻 **Autor de documentación:** Davide Mazzocchetti  
+
+---
+
+✅ **Conclusión:**  
+Este README refleja fielmente el trabajo realizado en la Semana 1:  
+- Se ha construido una base sólida del frontend con React + TypeScript.  
+- Se simula el flujo de usuario completo (login → tableros → columnas).  
+- El proyecto está listo para integrar Firebase y continuar la evolución funcional en la Semana 2.
+
