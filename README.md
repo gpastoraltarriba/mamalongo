@@ -66,6 +66,7 @@ src/
     firebase.ts (pendiente de implementación)
   router.tsx
   main.tsx
+  index.css
 ```
 
 ---
