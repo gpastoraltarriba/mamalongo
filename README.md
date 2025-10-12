@@ -169,15 +169,11 @@ La demo mostrará:
 - Añadir **responsable y fecha límite** a las tarjetas.  
 - Continuar con la **rotación de roles** para la Semana 2.
 
----
-
-📄 **Versión:** Semana 1 – Estructura base  
-👨‍💻 **Autor de documentación:** Davide Mazzocchetti  
 
 ---
 
 ✅ **Conclusión:**  
-Este README refleja fielmente el trabajo realizado en la Semana 1:  
+Este README refleja el trabajo realizado en la Semana 1:  
 - Se ha construido una base sólida del frontend con React + TypeScript.  
 - Se simula el flujo de usuario completo (login → tableros → columnas).  
 - El proyecto está listo para integrar Firebase y continuar la evolución funcional en la Semana 2.
