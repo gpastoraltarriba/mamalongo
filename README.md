@@ -63,7 +63,7 @@ src/
   components/
     Header.tsx
   lib/
-    firebase.ts (pendiente de implementación)
+    firebase.ts
   router.tsx
   main.tsx
   index.css
