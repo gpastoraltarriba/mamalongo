@@ -1,17 +1,13 @@
-// src/main.tsx
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { RouterProvider } from "react-router-dom";
+import { router } from "./router";
+import { AuthProvider } from "./components/AuthGate";
 
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css'; 
-
-// Importa el componente AppRouter que define todas tus rutas
-// (Login, Boards, BoardView, etc.)
-import { AppRouter } from './router'; 
-
-// Renderiza la aplicación en el elemento 'root' del index.html
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  // React.StrictMode es útil para detectar problemas y buenas prácticas
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <AppRouter /> {/* Usa el enrutador como componente principal */}
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   </React.StrictMode>
 );

@@ -1,67 +1,92 @@
 // src/pages/Boards.tsx
+// src/pages/Boards.tsx
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  addDoc, collection, onSnapshot, orderBy, query, serverTimestamp, where,
+} from "firebase/firestore";
+import { db } from "../lib/firebase";
+import { useAuth } from "../components/AuthGate";
+import Header from "../components/Header";
 
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import Header from '../components/Header'; 
+type Board = { id: string; name: string; ownerId: string; createdAt?: any };
 
-const Boards: React.FC = () => {
+export default function Boards() {
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
-  
-  const [boardName, setBoardName] = React.useState('');
+  const [boards, setBoards] = useState<Board[]>([]);
+  const [name, setName] = useState("");
 
-  const handleCreateBoard = (e: React.FormEvent) => {
+  useEffect(() => {
+  if (!user) return;
+  const ref = collection(db, "boards");
+  const q = query(ref, where("ownerId", "==", user.uid));
+
+  const unsub = onSnapshot(q, (ss) => {
+    const items = ss.docs.map(d => ({ id: d.id, ...(d.data() as any) }));
+    // ordenamos en cliente por createdAt (si no existe, 0)
+    items.sort((a, b) =>
+      (b?.createdAt?.seconds ?? 0) - (a?.createdAt?.seconds ?? 0)
+    );
+    setBoards(items);
+  });
+
+  return () => unsub();
+}, [user?.uid]);
+
+  const createBoard = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!boardName.trim()) return;
-
-    // Simulación de navegación a un ID de tablero recién creado
-    const newBoardId = Math.random().toString(36).substring(2, 9); 
-    
-    alert(`Tablero "${boardName}" creado. Navegando a /board/${newBoardId}`);
-    navigate(`/board/${newBoardId}`); 
+    if (!name.trim() || !user) return;
+    const ref = collection(db, "boards");
+    const docRef = await addDoc(ref, {
+      name: name.trim(),
+      ownerId: user.uid,
+      createdAt: serverTimestamp(),
+    });
+    setName("");
+    navigate(`/board/${docRef.id}`);
   };
-  
+
+  const card: React.CSSProperties = { background: "white", padding: 16, borderRadius: 8, boxShadow: "0 1px 3px rgba(0,0,0,.15)" };
+
   return (
-    <> {/* <-- Abre el React Fragment */}
-      <Header /> {/* <-- Añade el componente Header */}
-      
-      <div className="page-container">
-        {/* Título y contenido principal de la página */}
-        <h1 style={{ color: '#172b4d' }}>Tableros del Equipo</h1>
-        
-        {/* Formulario para Crear Tablero */}
-        <form onSubmit={handleCreateBoard} style={{ 
-          marginBottom: '30px', 
-          backgroundColor: 'white', 
-          padding: '20px', 
-          borderRadius: '8px', 
-          boxShadow: '0 1px 3px rgba(9, 30, 66, 0.25)' 
-        }}>
-          <h3 style={{ marginTop: 0 }}>Crear un Tablero Nuevo</h3>
-          <input 
-            type="text"
-            placeholder="Nombre del nuevo tablero"
-            value={boardName}
-            onChange={(e) => setBoardName(e.target.value)}
-            required
-            style={{ padding: '10px', marginRight: '15px', width: '300px', border: '1px solid #ccc', borderRadius: '4px' }}
+    <>
+      <Header />
+      <div style={{ padding: 20, maxWidth: 960, margin: "0 auto" }}>
+        <h2 style={{ color: "#172b4d", marginBottom: 12 }}>Tus tableros</h2>
+
+        {/* Crear tablero */}
+        <form onSubmit={createBoard} style={{ ...card, marginBottom: 16, display: "flex", gap: 8 }}>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Nombre del tablero"
+            style={{ flex: 1, padding: 10, border: "1px solid #ddd", borderRadius: 6 }}
           />
-          <button type="submit" disabled={!boardName.trim()} style={{ padding: '10px 20px', backgroundColor: '#5aac44', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-            Crear
+          <button
+            type="submit"
+            style={{ padding: "10px 14px", border: "none", borderRadius: 6, background: "#5aac44", color: "white", fontWeight: 600 }}
+          >
+            Crear tablero
           </button>
         </form>
 
-        {/* Simulación de lista de tableros existentes */}
-        <h2>Mis Tableros</h2>
-        <p style={{ color: '#5e6c84' }}>Haz clic para ver la vista de tu tablero:</p>
-        <button onClick={() => navigate('/board/demo-123')}
-          style={{ padding: '10px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-        >
-          Ver Tablero de Demostración (ID: demo-123)
-        </button>
-
+        {/* Lista de tableros */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px,1fr))", gap: 12 }}>
+          {boards.map(b => (
+            <div key={b.id} style={card}>
+              <div style={{ fontWeight: 700, marginBottom: 8 }}>{b.name}</div>
+              <button
+                onClick={() => navigate(`/board/${b.id}`)}
+                style={{ padding: "8px 10px", border: "none", borderRadius: 6, background: "#0079bf", color: "white" }}
+              >
+                Abrir tablero
+              </button>
+            </div>
+          ))}
+          {boards.length === 0 && <div style={{ ...card, opacity: .8 }}>*Aún no tienes tableros*</div>}
+        </div>
       </div>
     </>
   );
-};
-
-export default Boards;
+}

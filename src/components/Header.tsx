@@ -1,51 +1,62 @@
 // src/components/Header.tsx
+import React from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { auth } from "../lib/firebase";
+import { useAuth } from "./AuthGate";
 
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+export default function Header() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
-const Header: React.FC = () => {
-    const navigate = useNavigate();
-    
-    // El usuario real se obtendría de Firebase, pero por ahora es simulado
-    const user = { name: "Usuario Delta", email: "simulado@nexeus.com" }; 
+  const name = user?.displayName?.trim() || "";
+  const email = user?.email || "";
+  const userLabel = name ? `${name} (${email})` : email;
 
-    const handleLogout = () => {
-        // aquí se llamará a Firebase auth.signOut()
-        console.log("Logout SIMULADO. Redirigiendo al Login.");
-        navigate('/login');
-    };
+  const logout = async () => {
+    await signOut(auth);
+    navigate("/login", { replace: true });
+  };
 
-    return (
-        <header style={{ 
-            backgroundColor: '#172b4d', 
-            padding: '10px 30px', 
-            color: 'white', 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }}>
-            <h2 style={{ margin: 0 }}>Kanban & Timesheets Lite</h2>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-                <span style={{ marginRight: '15px', fontSize: '14px' }}>
-                    {user.name} ({user.email})
-                </span>
-                <button 
-                    onClick={handleLogout} 
-                    style={{ 
-                        padding: '8px 15px', 
-                        backgroundColor: '#ff5630', 
-                        color: 'white', 
-                        border: 'none', 
-                        borderRadius: '3px', 
-                        cursor: 'pointer' 
-                    }}
-                >
-                    Cerrar Sesión
-                </button>
-            </div>
-        </header>
-    );
-};
+  const topBar: React.CSSProperties = {
+    background: "#162B4A", // azul oscuro
+    color: "white",
+    padding: "10px 16px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    boxShadow: "0 2px 4px rgba(0,0,0,.2)",
+  };
 
-export default Header;
+  const titleStyle: React.CSSProperties = { fontWeight: 700, fontSize: 24 };
+  const right: React.CSSProperties = { display: "flex", gap: 12, alignItems: "center" };
+  const linkBtn: React.CSSProperties = {
+    textDecoration: "none",
+    padding: "8px 12px",
+    background: "transparent",
+    border: "1px solid rgba(255,255,255,.4)",
+    borderRadius: 6,
+    color: "white",
+  };
+  const dangerBtn: React.CSSProperties = {
+    border: "none",
+    padding: "8px 12px",
+    borderRadius: 6,
+    background: "#FF6A3D", // naranja
+    color: "white",
+    cursor: "pointer",
+    fontWeight: 600,
+  };
+
+  return (
+    <header style={topBar}>
+      <div style={titleStyle}>Kanban & Timesheets Lite</div>
+
+      <div style={right}>
+        <NavLink to="/" style={linkBtn}>Volver a inicio</NavLink>
+        <span style={{ opacity: 0.9 }}>{userLabel}</span>
+        <button onClick={logout} style={dangerBtn}>Cerrar Sesión</button>
+      </div>
+    </header>
+  );
+}
