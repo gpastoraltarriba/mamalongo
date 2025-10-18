@@ -1,127 +1,242 @@
 // src/components/CardForm.tsx
-import React, { useMemo, useState } from "react";
-import type { Card, ListId } from "../lib/BoardData";
-import { addCard, updateCard, LABEL, STATUSES } from "../lib/BoardData";
+import React from "react";
+import type { ListId, Card } from "../lib/BoardData";
+import {
+  addDoc,
+  updateDoc,
+  collection,
+  doc,
+  getDoc,
+} from "firebase/firestore";
+import { db } from "../lib/firebase";
+import { STATUSES, LABEL } from "../lib/BoardData";
 
 type Props = {
   boardId: string;
-  initial?: Partial<Card>; 
-  defaultListId?: ListId;  
-  onClose?: () => void;
+  defaultListId: ListId;
+  editingCard?: Card;   // si viene => edición
+  onClose: () => void;
 };
 
-export default function CardForm({ boardId, initial, defaultListId = "todo", onClose }: Props) {
-  const editing = Boolean(initial?.id);
+type FormValues = {
+  title: string;
+  description: string;
+  assigneeUid: string;
+  dueDate: string;      // ISO o ""
+  listId: ListId;
+};
 
-  const [title, setTitle] = useState(initial?.title ?? "");
-  const [description, setDescription] = useState(initial?.description ?? "");
-  const [listId, setListId] = useState<ListId>((initial?.listId as ListId) ?? defaultListId);
-  const [dueDate, setDueDate] = useState<string | "">(initial?.dueDate ?? "");
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+function validate(v: FormValues) {
+  const e: Record<string, string> = {};
+  if (!v.title?.trim()) e.title = "El título es obligatorio";
+  if (v.title && v.title.length > 80) e.title = "Máximo 80 caracteres";
+  if (v.dueDate) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const d = new Date(v.dueDate); d.setHours(0,0,0,0);
+    if (d < today) e.dueDate = "La fecha no puede ser pasada";
+  }
+  return e;
+}
 
-  const canSubmit = useMemo(() => {
-    const t = title.trim();
-    if (t.length < 3 || t.length > 120) return false;
-    if (dueDate && !/^\d{4}-\d{2}-\d{2}$/.test(dueDate)) return false;
-    return true;
-  }, [title, dueDate]);
+export default function CardForm({ boardId, defaultListId, editingCard, onClose }: Props) {
+  const isEdit = !!editingCard;
+  const [values, setValues] = React.useState<FormValues>(() => ({
+    title: editingCard?.title ?? "",
+    description: editingCard?.description ?? "",
+    assigneeUid: editingCard?.assigneeUid ?? "",
+    dueDate: editingCard?.dueDate ?? "",
+    listId: editingCard?.listId ?? defaultListId,
+  }));
+  const [errors, setErrors] = React.useState<Record<string, string>>({});
+  const [saving, setSaving] = React.useState(false);
 
-  const submit = async (e: React.FormEvent) => {
+  const onChange =
+    (k: keyof FormValues) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+      setValues((p) => ({ ...p, [k]: e.target.value }));
+
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
-    if (!canSubmit) {
-      setError("Revisa los campos: título (3–120) y fecha (YYYY-MM-DD).");
-      return;
-    }
+    const e1 = validate(values);
+    setErrors(e1);
+    if (Object.keys(e1).length) return;
+
     try {
-      setBusy(true);
+      setSaving(true);
       const payload = {
-        title: title.trim(),
-        description: description.trim(),
-        listId,
-        dueDate: dueDate || null,
+        listId: values.listId,
+        title: values.title.trim(),
+        description: values.description.trim() || "",
+        assigneeUid: values.assigneeUid.trim() || "",
+        dueDate: values.dueDate || "",
+        updatedAt: Date.now(),
       };
 
-      if (editing && initial?.id) {
-        await updateCard(boardId, initial.id, payload);
+      if (isEdit && editingCard) {
+        const ref = doc(db, "boards", boardId, "cards", editingCard.id);
+        const snap = await getDoc(ref);
+        if (!snap.exists()) {
+          alert("La tarjeta que intentas editar ya no existe.");
+          onClose();
+          return;
+        }
+        await updateDoc(ref, payload);
       } else {
-        await addCard(boardId, payload);
+        await addDoc(collection(db, "boards", boardId, "cards"), {
+          ...payload,
+          createdAt: Date.now(),
+          order: null,
+        });
       }
-      onClose?.();
-    } catch (e: any) {
-      console.error(e);
-      setError("No se pudo guardar la tarjeta.");
+
+      onClose();
+    } catch (err) {
+      console.error(err);
+      alert("No se pudo guardar la tarjeta. Revisa conexión/reglas de Firestore.");
     } finally {
-      setBusy(false);
+      setSaving(false);
     }
-  };
+  }
+
+  const titleCount = values.title.length;
+  const titleTooLong = titleCount > 80;
 
   return (
-    <form onSubmit={submit} style={{ background: "white", borderRadius: 8, padding: 12, boxShadow: "0 1px 3px rgba(0,0,0,.15)" }}>
-      <div style={{ fontWeight: 700, marginBottom: 8 }}>
-        {editing ? "Editar tarjeta" : "Nueva tarjeta"}
+    <form onSubmit={onSubmit} style={{ background: "#fff", borderRadius: 8, border: "1px solid #cbd5e1", padding: 10 }}>
+      {/* Título */}
+      <label style={{ display: "block", fontSize: 12, color: "#475569", marginBottom: 4 }}>
+        Título <span style={{ color: "#ef4444" }}>*</span>
+      </label>
+      <input
+        value={values.title}
+        onChange={onChange("title")}
+        placeholder="Ej. Configurar auth en Firebase"
+        maxLength={120}
+        style={{
+          width: "100%",
+          padding: 8,
+          borderRadius: 6,
+          border: `1px solid ${errors.title || titleTooLong ? "#ef4444" : "#94a3b8"}`,
+          marginBottom: 4,
+        }}
+      />
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+        <small style={{ color: errors.title ? "#b91c1c" : "#64748b" }}>
+          {errors.title ?? "Obligatorio. Máx. 80 caracteres."}
+        </small>
+        <small style={{ color: titleTooLong ? "#b91c1c" : "#64748b" }}>
+          {titleCount}/80
+        </small>
       </div>
 
-      <div style={{ display: "grid", gap: 8 }}>
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Título (3–120)"
-          maxLength={120}
-          style={{ padding: 8, border: "1px solid #ddd", borderRadius: 6 }}
-        />
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Descripción (opcional)"
-          rows={3}
-          style={{ padding: 8, border: "1px solid #ddd", borderRadius: 6, resize: "vertical" }}
-        />
-        <div style={{ display: "flex", gap: 8 }}>
-          <select
-            value={listId}
-            onChange={(e) => setListId(e.target.value as ListId)}
-            style={{ padding: 8, border: "1px solid #ddd", borderRadius: 6 }}
-            title="Columna"
-          >
-            {STATUSES.map((s) => (
-              <option key={s} value={s}>{LABEL[s]}</option>
-            ))}
-          </select>
-          <input
-            type="date"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-            style={{ padding: 8, border: "1px solid #ddd", borderRadius: 6 }}
-            title="Fecha límite (opcional)"
-          />
-        </div>
+      {/* Descripción */}
+      <label style={{ display: "block", fontSize: 12, color: "#475569", marginBottom: 4 }}>Descripción</label>
+      <textarea
+        value={values.description}
+        onChange={onChange("description")}
+        placeholder="Detalles de la tarea…"
+        rows={3}
+        style={{
+          width: "100%",
+          padding: 8,
+          borderRadius: 6,
+          border: "1px solid #94a3b8",
+          marginBottom: 8,
+          resize: "vertical",
+        }}
+      />
 
-        {error && <div style={{ color: "crimson" }}>{error}</div>}
+      {/* Responsable */}
+      <label style={{ display: "block", fontSize: 12, color: "#475569", marginBottom: 4 }}>
+        Responsable (UID / nombre corto)
+      </label>
+      <input
+        value={values.assigneeUid}
+        onChange={onChange("assigneeUid")}
+        placeholder="uid_gerard (opcional)"
+        style={{
+          width: "100%",
+          padding: 8,
+          borderRadius: 6,
+          border: "1px solid #94a3b8",
+          marginBottom: 8,
+        }}
+      />
 
-        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-          {onClose && (
-            <button type="button" onClick={onClose} style={{ padding: "8px 12px", borderRadius: 6, border: "1px solid #ddd" }}>
-              Cancelar
-            </button>
-          )}
-          <button
-            type="submit"
-            disabled={!canSubmit || busy}
-            style={{
-              padding: "8px 12px",
-              border: "none",
-              borderRadius: 6,
-              background: busy ? "#86c57a" : "#5aac44",
-              color: "white",
-              fontWeight: 600,
-              cursor: !canSubmit || busy ? "not-allowed" : "pointer",
-            }}
-          >
-            {busy ? "Guardando..." : editing ? "Guardar cambios" : "Crear tarjeta"}
-          </button>
-        </div>
+      {/* Fecha */}
+      <label style={{ display: "block", fontSize: 12, color: "#475569", marginBottom: 4 }}>
+        Fecha de vencimiento
+      </label>
+      <input
+        type="date"
+        value={values.dueDate}
+        onChange={onChange("dueDate")}
+        style={{
+          width: "100%",
+          padding: 8,
+          borderRadius: 6,
+          border: `1px solid ${errors.dueDate ? "#ef4444" : "#94a3b8"}`,
+          marginBottom: 4,
+        }}
+      />
+      <small style={{ display: "block", color: errors.dueDate ? "#b91c1c" : "#64748b", marginBottom: 8 }}>
+        {errors.dueDate ?? "Opcional, no puede ser pasada."}
+      </small>
+
+      {/* Columna */}
+      <label style={{ display: "block", fontSize: 12, color: "#475569", marginBottom: 4 }}>
+        Columna
+      </label>
+      <select
+        value={values.listId}
+        onChange={onChange("listId")}
+        style={{
+          width: "100%",
+          padding: 8,
+          borderRadius: 6,
+          border: "1px solid #94a3b8",
+          marginBottom: 10,
+          background: "white",
+        }}
+      >
+        {STATUSES.map((st) => (
+          <option key={st} value={st}>
+            {LABEL[st]}
+          </option>
+        ))}
+      </select>
+
+      {/* Botones */}
+      <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+        <button
+          type="button"
+          onClick={onClose}
+          style={{
+            padding: "8px 12px",
+            borderRadius: 6,
+            border: "1px solid #94a3b8",
+            background: "#f8fafc",
+            cursor: "pointer",
+          }}
+          disabled={saving}
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          disabled={saving}
+          style={{
+            padding: "8px 12px",
+            borderRadius: 6,
+            border: "none",
+            background: saving ? "#86c57a" : "#5aac44",
+            color: "white",
+            fontWeight: 700,
+            cursor: saving ? "not-allowed" : "pointer",
+          }}
+        >
+          {saving ? "Guardando…" : isEdit ? "Guardar cambios" : "Crear tarjeta"}
+        </button>
       </div>
     </form>
   );
