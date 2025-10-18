@@ -19,7 +19,7 @@ export default function Header() {
   };
 
   const topBar: React.CSSProperties = {
-    background: "#162B4A", // azul oscuro
+    background: "#162B4A", 
     color: "white",
     padding: "10px 16px",
     display: "flex",
@@ -42,7 +42,7 @@ export default function Header() {
     border: "none",
     padding: "8px 12px",
     borderRadius: 6,
-    background: "#FF6A3D", // naranja
+    background: "#FF6A3D", 
     color: "white",
     cursor: "pointer",
     fontWeight: 600,

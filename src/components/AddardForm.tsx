@@ -8,7 +8,7 @@ export default function AddCardForm({
   listId,
 }: {
   boardId: string;
-  listId: ListId; // 👈 antes era "status"
+  listId: ListId; 
 }) {
   const [title, setTitle] = useState("");
   const [busy, setBusy] = useState(false);

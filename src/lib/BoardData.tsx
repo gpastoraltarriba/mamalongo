@@ -10,11 +10,11 @@ export type ListId = "todo" | "doing" | "done";
 export type Card = {
   id: string;
   boardId: string;
-  listId: ListId;         // columna
+  listId: ListId;         
   title: string;
   description?: string;
-  dueDate?: string | null; // ISO "YYYY-MM-DD" (simple)  (puedes migrar a Timestamp si quieres)
-  order?: number;         // orden dentro de la columna
+  dueDate?: string | null;
+  order?: number;         
   createdAt?: any;
   updatedAt?: any;
 };
@@ -32,12 +32,12 @@ export async function ensureBoard(boardId: string) {
   if (!snap.exists()) await setDoc(ref, { createdAt: serverTimestamp() });
 }
 
-// Suscripción: traemos todas las tarjetas del board y ordenamos en cliente
+
 export function listenCards(boardId: string, cb: (cards: Card[]) => void) {
   const ref = collection(db, "boards", boardId, "cards");
   return onSnapshot(ref, (ss) => {
     const list: Card[] = ss.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
-    // Orden estable: por listId (todo<doing<done), luego por order (undefined al final), luego por dueDate
+
     const rank: Record<ListId, number> = { todo: 0, doing: 1, done: 2 };
     list.sort((a, b) => {
       const ra = rank[a.listId], rb = rank[b.listId];
@@ -45,7 +45,7 @@ export function listenCards(boardId: string, cb: (cards: Card[]) => void) {
       const oa = a.order ?? Number.MAX_SAFE_INTEGER;
       const ob = b.order ?? Number.MAX_SAFE_INTEGER;
       if (oa !== ob) return oa - ob;
-      // dueDate opcional: primero fechas más cercanas
+
       const da = a.dueDate ?? "9999-12-31";
       const dbb = b.dueDate ?? "9999-12-31";
       return da.localeCompare(dbb);
@@ -54,13 +54,13 @@ export function listenCards(boardId: string, cb: (cards: Card[]) => void) {
   });
 }
 
-// Crear con validación previa (el form valida, aquí asumimos válido)
+
 export async function addCard(
   boardId: string,
   data: { title: string; listId: ListId; description?: string; dueDate?: string | null }
 ) {
   const ref = collection(db, "boards", boardId, "cards");
-  const nowOrder = Date.now(); // orden inicial único
+  const nowOrder = Date.now();
   await addDoc(ref, {
     boardId,
     listId: data.listId,
@@ -88,7 +88,7 @@ export async function removeCard(boardId: string, id: string) {
   await deleteDoc(doc(db, "boards", boardId, "cards", id));
 }
 
-// Guardar orden de una columna (y fijar listId por si vinieran mezcladas)
+
 export async function saveColumnOrderForStatus(
   boardId: string,
   listId: ListId,
@@ -105,7 +105,7 @@ export async function saveColumnOrderForStatus(
   await batch.commit();
 }
 
-// (Opcional) normalizar orden actual de una columna (0..n)
+
 export async function normalizeOrders(boardId: string) {
   for (const listId of STATUSES) {
     const qRef = query(collection(db, "boards", boardId, "cards"), where("listId", "==", listId));

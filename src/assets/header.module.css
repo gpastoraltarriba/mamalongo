@@ -1,0 +1,23 @@
+.header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #113A67;
+    color: white;
+    padding: 12px 16px;
+}
+.btn{
+    border: 0;
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+.btnLogIn{
+    background-color:#5aac44;
+    color: white;
+
+}
+.btnLogout{
+    background-color:#e5533d;
+    color: white;
+
+}

@@ -18,12 +18,12 @@ export type Card = {
   title: string;
   description?: string;
   status: CardStatus;
-  createdAt?: any; // Firestore Timestamp
+  createdAt?: any; 
 };
 
 const cardsCol = (boardId: string) => collection(db, "boards", boardId, "cards");
 
-/** Suscripción en tiempo real a TODAS las tarjetas del tablero */
+
 export function subscribeCards(
   boardId: string,
   handler: (cards: Card[]) => void
@@ -35,7 +35,7 @@ export function subscribeCards(
   });
 }
 
-/** Crear tarjeta */
+
 export async function addCard(boardId: string, title: string, status: CardStatus = "todo") {
   if (!title.trim()) return;
   await addDoc(cardsCol(boardId), {
@@ -45,7 +45,7 @@ export async function addCard(boardId: string, title: string, status: CardStatus
   });
 }
 
-/** Mover tarjeta a otro estado */
+
 export async function moveCard(boardId: string, cardId: string, status: CardStatus) {
   await updateDoc(doc(db, "boards", boardId, "cards", cardId), { status });
 }

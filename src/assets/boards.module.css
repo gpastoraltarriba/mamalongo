@@ -1,0 +1,58 @@
+.formControl{
+    margin-bottom: 30px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(9,30,66,0.25);
+}
+.formInput{
+    padding: 10px;
+    margin-right: 15px;
+    width: 300px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.formBtn{
+    padding: 10px 20px;
+    background-color: #5aac44;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.cardTable{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 10px;
+}
+.cardBoard{
+    width: 180px;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(9,30,66,0.25);
+    background-color: white;
+}
+.cardBoardTitle{
+    margin-top: 0px;
+    color: #172b4d;
+    font-weight: 100;
+    text-transform: capitalize;
+}
+.cardBoardBtn{
+    padding: 10px;
+    width: 100px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.msgError{
+    width: 100%;
+    padding: 10px 0px;
+    text-align: center;
+    margin-bottom: 5px;
+    background-color: rgb(245, 106, 106);
+    border-radius: 5px;
+}

@@ -1,5 +1,5 @@
 // src/pages/Boards.tsx
-// src/pages/Boards.tsx
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -24,7 +24,7 @@ export default function Boards() {
 
   const unsub = onSnapshot(q, (ss) => {
     const items = ss.docs.map(d => ({ id: d.id, ...(d.data() as any) }));
-    // ordenamos en cliente por createdAt (si no existe, 0)
+    
     items.sort((a, b) =>
       (b?.createdAt?.seconds ?? 0) - (a?.createdAt?.seconds ?? 0)
     );

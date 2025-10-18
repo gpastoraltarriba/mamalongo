@@ -5,8 +5,8 @@ import { addCard, updateCard, LABEL, STATUSES } from "../lib/BoardData";
 
 type Props = {
   boardId: string;
-  initial?: Partial<Card>; // si trae id -> edición
-  defaultListId?: ListId;  // para modo crear en columna concreta
+  initial?: Partial<Card>; 
+  defaultListId?: ListId;  
   onClose?: () => void;
 };
 

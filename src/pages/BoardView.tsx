@@ -10,7 +10,7 @@ import Header from "../components/Header";
 import CardItem from "../components/CardItems";
 import CardForm from "../components/CardForm";
 
-// (Sin DnD) Cambio de columna se hace en el formulario de edición/creación.
+
 
 export default function BoardView() {
   const { boardId = "demo-123" } = useParams();
@@ -29,7 +29,7 @@ export default function BoardView() {
   const grouped = useMemo(() => {
     const g: Record<ListId, Card[]> = { todo: [], doing: [], done: [] };
     for (const c of cards) g[c.listId].push(c);
-    // opcional: orden estable dentro de cada columna por 'order'
+    
     (Object.keys(g) as ListId[]).forEach((k) => {
       g[k].sort((a, b) => (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER));
     });
