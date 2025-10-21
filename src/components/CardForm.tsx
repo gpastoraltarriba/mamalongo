@@ -1,20 +1,12 @@
 // src/components/CardForm.tsx
 import React from "react";
+import { STATUSES, LABEL, addCard, updateCard } from "../lib/BoardData";
 import type { ListId, Card } from "../lib/BoardData";
-import {
-  addDoc,
-  updateDoc,
-  collection,
-  doc,
-  getDoc,
-} from "firebase/firestore";
-import { db } from "../lib/firebase";
-import { STATUSES, LABEL } from "../lib/BoardData";
 
 type Props = {
   boardId: string;
   defaultListId: ListId;
-  editingCard?: Card;   // si viene => edición
+  editingCard?: Card;
   onClose: () => void;
 };
 
@@ -22,7 +14,7 @@ type FormValues = {
   title: string;
   description: string;
   assigneeUid: string;
-  dueDate: string;      // ISO o ""
+  dueDate: string;
   listId: ListId;
 };
 
@@ -69,26 +61,12 @@ export default function CardForm({ boardId, defaultListId, editingCard, onClose 
         description: values.description.trim() || "",
         assigneeUid: values.assigneeUid.trim() || "",
         dueDate: values.dueDate || "",
-        updatedAt: Date.now(),
       };
-
       if (isEdit && editingCard) {
-        const ref = doc(db, "boards", boardId, "cards", editingCard.id);
-        const snap = await getDoc(ref);
-        if (!snap.exists()) {
-          alert("La tarjeta que intentas editar ya no existe.");
-          onClose();
-          return;
-        }
-        await updateDoc(ref, payload);
+        await updateCard(boardId, editingCard.id, payload);
       } else {
-        await addDoc(collection(db, "boards", boardId, "cards"), {
-          ...payload,
-          createdAt: Date.now(),
-          order: null,
-        });
+        await addCard(boardId, { ...payload });
       }
-
       onClose();
     } catch (err) {
       console.error(err);
@@ -103,7 +81,6 @@ export default function CardForm({ boardId, defaultListId, editingCard, onClose 
 
   return (
     <form onSubmit={onSubmit} style={{ background: "#fff", borderRadius: 8, border: "1px solid #cbd5e1", padding: 10 }}>
-      {/* Título */}
       <label style={{ display: "block", fontSize: 12, color: "#475569", marginBottom: 4 }}>
         Título <span style={{ color: "#ef4444" }}>*</span>
       </label>
@@ -129,7 +106,6 @@ export default function CardForm({ boardId, defaultListId, editingCard, onClose 
         </small>
       </div>
 
-      {/* Descripción */}
       <label style={{ display: "block", fontSize: 12, color: "#475569", marginBottom: 4 }}>Descripción</label>
       <textarea
         value={values.description}
@@ -146,7 +122,6 @@ export default function CardForm({ boardId, defaultListId, editingCard, onClose 
         }}
       />
 
-      {/* Responsable */}
       <label style={{ display: "block", fontSize: 12, color: "#475569", marginBottom: 4 }}>
         Responsable (UID / nombre corto)
       </label>
@@ -163,7 +138,6 @@ export default function CardForm({ boardId, defaultListId, editingCard, onClose 
         }}
       />
 
-      {/* Fecha */}
       <label style={{ display: "block", fontSize: 12, color: "#475569", marginBottom: 4 }}>
         Fecha de vencimiento
       </label>
@@ -183,7 +157,6 @@ export default function CardForm({ boardId, defaultListId, editingCard, onClose 
         {errors.dueDate ?? "Opcional, no puede ser pasada."}
       </small>
 
-      {/* Columna */}
       <label style={{ display: "block", fontSize: 12, color: "#475569", marginBottom: 4 }}>
         Columna
       </label>
@@ -206,7 +179,6 @@ export default function CardForm({ boardId, defaultListId, editingCard, onClose 
         ))}
       </select>
 
-      {/* Botones */}
       <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
         <button
           type="button"

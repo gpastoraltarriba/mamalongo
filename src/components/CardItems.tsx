@@ -1,53 +1,28 @@
-// src/components/CardItem.tsx
 import React from "react";
 import type { Card } from "../lib/BoardData";
-import { doc, deleteDoc, updateDoc } from "firebase/firestore";
-import { db } from "../lib/firebase";
 import CardForm from "./CardForm";
+import { updateCard, removeCard } from "../lib/BoardData";
 
 type Props = {
   boardId: string;
   card: Card;
 };
 
-/** Devuelve info de vencimiento para pintar una etiqueta */
 function getDueBadge(dueDate?: string | null) {
   if (!dueDate) return null;
-
-  // Normalizamos a medianoche local para comparar solo fechas
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const due = new Date(`${dueDate}T00:00:00`);
   if (isNaN(+due)) return null;
-
   const diffMs = due.getTime() - today.getTime();
   const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-
   if (diffDays < 0) {
-    // Vencida
-    return {
-      text: `Vencida (${Math.abs(diffDays)}d)`,
-      bg: "#fee2e2", // rojo claro
-      fg: "#b91c1c", // rojo texto
-      title: "La fecha ya pasó",
-    };
+    return { text: `Vencida (${Math.abs(diffDays)}d)`, bg: "#fee2e2", fg: "#b91c1c", title: "La fecha ya pasó" };
   }
   if (diffDays <= 2) {
-    // Urgente (faltan 0-2 días)
-    return {
-      text: `⚠︎ Quedan ${diffDays}d`,
-      bg: "#fef3c7", // ámbar claro
-      fg: "#b45309", // ámbar texto
-      title: "Quedan menos de 3 días",
-    };
+    return { text: `⚠︎ Quedan ${diffDays}d`, bg: "#fef3c7", fg: "#b45309", title: "Quedan menos de 3 días" };
   }
   if (diffDays <= 7) {
-    // Próxima (opcional, quítalo si solo quieres <3)
-    return {
-      text: `En ${diffDays}d`,
-      bg: "#fffbeb", // amarillo muy claro
-      fg: "#92400e",
-      title: "Vence en menos de 1 semana",
-    };
+    return { text: `En ${diffDays}d`, bg: "#fffbeb", fg: "#92400e", title: "Vence en menos de 1 semana" };
   }
   return null;
 }
@@ -57,18 +32,14 @@ export default function CardItem({ boardId, card }: Props) {
 
   const toggleDone = async () => {
     const next = card.listId === "done" ? "doing" : "done";
-    await updateDoc(doc(db, "boards", boardId, "cards", card.id), {
-      listId: next,
-      updatedAt: Date.now(),
-    });
+    await updateCard(boardId, card.id, { listId: next });
   };
 
   const onDelete = async () => {
     if (!confirm("¿Eliminar tarjeta?")) return;
-    await deleteDoc(doc(db, "boards", boardId, "cards", card.id));
+    await removeCard(boardId, card.id);
   };
 
-  // Calcula badge por fecha
   const dueBadge = getDueBadge(card.dueDate ?? undefined);
 
   if (editing) {
@@ -109,17 +80,12 @@ export default function CardItem({ boardId, card }: Props) {
       )}
 
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-        {/* Responsable */}
         {card.assigneeUid && (
           <span style={{ fontSize: 12, color: "#64748b" }}>👤 {card.assigneeUid}</span>
         )}
-
-        {/* Fecha */}
         {card.dueDate && (
           <span style={{ fontSize: 12, color: "#64748b" }}>⏰ {card.dueDate}</span>
         )}
-
-        {/* Badge de estado de vencimiento */}
         {dueBadge && (
           <span
             title={dueBadge.title}

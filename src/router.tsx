@@ -1,6 +1,6 @@
 // src/router.tsx
 import { createBrowserRouter } from "react-router-dom";
-import ProtectedRoute from "./components/ProtectedRoutes";
+import ProtectedRoute from "./routes/ProtectedRoutes";
 import Login from "./pages/Login";
 import Boards from "./pages/Boards";      // si quieres una vista de todos los tableros
 import BoardView from "./pages/BoardView";

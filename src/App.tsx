@@ -1,7 +1,7 @@
 // src/App.tsx
 import React, { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { auth } from "./lib/firebase";
+import { auth } from "./lib/BoardData";
 import { onAuthStateChanged } from "firebase/auth";
 import type { User } from "firebase/auth";
 

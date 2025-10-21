@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { onAuthStateChanged, type User } from "firebase/auth";
-import { auth } from "../lib/firebase";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import type { User } from "firebase/auth";
+import { observeAuth } from "../lib/BoardData";
 
 type AuthCtx = { user: User | null; loading: boolean };
 const AuthContext = createContext<AuthCtx>({ user: null, loading: true });
@@ -10,15 +10,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
+    const unsub = observeAuth((u) => {
       setUser(u);
       setLoading(false);
     });
     return () => unsub();
   }, []);
 
-  return <AuthContext.Provider value={{ user, loading }}>{children}</AuthContext.Provider>;
+  const value = useMemo(() => ({ user, loading }), [user, loading]);
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export const useAuth = () => useContext(AuthContext);
+
+
+
+
+
 

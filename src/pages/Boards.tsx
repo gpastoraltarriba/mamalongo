@@ -1,11 +1,9 @@
-// src/pages/Boards.tsx
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   addDoc, collection, onSnapshot, orderBy, query, serverTimestamp, where,
 } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { db } from "../lib/BoardData";
 import { useAuth } from "../components/AuthGate";
 import Header from "../components/Header";
 
@@ -55,7 +53,7 @@ export default function Boards() {
       <div style={{ padding: 20, maxWidth: 960, margin: "0 auto" }}>
         <h2 style={{ color: "#172b4d", marginBottom: 12 }}>Tus tableros</h2>
 
-        {/* Crear tablero */}
+        
         <form onSubmit={createBoard} style={{ ...card, marginBottom: 16, display: "flex", gap: 8 }}>
           <input
             value={name}
@@ -71,7 +69,7 @@ export default function Boards() {
           </button>
         </form>
 
-        {/* Lista de tableros */}
+        
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px,1fr))", gap: 12 }}>
           {boards.map(b => (
             <div key={b.id} style={card}>

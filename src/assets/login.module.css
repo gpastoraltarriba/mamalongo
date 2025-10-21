@@ -31,7 +31,7 @@
     background-color: rgb(245, 106, 106);
     border-radius: 5px;
 }
-/* Formulario */
+
 .formInput{
     width: 95%;
     padding: 10px;
@@ -49,7 +49,7 @@
     border-radius: 4px;
     font-size: 16px;
 }
-/* Boton para enviar al Registro */
+
 .textSignup{
     margin-bottom: 0;
     text-align: center;

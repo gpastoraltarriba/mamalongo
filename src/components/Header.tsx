@@ -1,8 +1,7 @@
-// src/components/Header.tsx
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
-import { auth } from "../lib/firebase";
+import { auth } from "../lib/BoardData";
 import { useAuth } from "./AuthGate";
 
 export default function Header() {
@@ -19,7 +18,7 @@ export default function Header() {
   };
 
   const topBar: React.CSSProperties = {
-    background: "#162B4A", 
+    background: "#162B4A",
     color: "white",
     padding: "10px 16px",
     display: "flex",
@@ -42,7 +41,7 @@ export default function Header() {
     border: "none",
     padding: "8px 12px",
     borderRadius: 6,
-    background: "#FF6A3D", 
+    background: "#FF6A3D",
     color: "white",
     cursor: "pointer",
     fontWeight: 600,
@@ -51,11 +50,16 @@ export default function Header() {
   return (
     <header style={topBar}>
       <div style={titleStyle}>Kanban & Timesheets Lite</div>
-
       <div style={right}>
         <NavLink to="/" style={linkBtn}>Volver a inicio</NavLink>
-        <span style={{ opacity: 0.9 }}>{userLabel}</span>
-        <button onClick={logout} style={dangerBtn}>Cerrar Sesión</button>
+        {user ? (
+          <>
+            <span style={{ opacity: 0.9 }}>{userLabel}</span>
+            <button onClick={logout} style={dangerBtn}>Cerrar Sesión</button>
+          </>
+        ) : (
+          <NavLink to="/login" style={linkBtn}>Iniciar sesión</NavLink>
+        )}
       </div>
     </header>
   );

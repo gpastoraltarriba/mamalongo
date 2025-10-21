@@ -7,7 +7,7 @@ import {
   signOut,
   type User,
 } from "firebase/auth";
-import { auth } from "./firebase";
+import { auth } from "./BoardData";
 
 
 export async function loginWithGoogleRedirect() {
